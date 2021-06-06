@@ -1,0 +1,69 @@
+{
+  "name": "XBow",
+  "skillType": 8,
+  "craftingStation": "$piece_forge",
+  "minStationLevel": 1,
+  "maxQuality": 5,
+  "amount": 1,
+  "repairStation": "$piece_forge",
+  "reqs": [
+    "BlackMetal:60",
+    "Crystal:10",
+    "FineWood:8",
+    "LinenThread:20"
+  ],
+  "upgradeReqs": [
+    "BlackMetal:30",
+    "Crystal:5",
+    "FineWood:4",
+    "LinenThread:10"
+  ],
+  "durabilityEffects": [
+    "useDurability:true",
+    "useDurabilityDrain:1.0",
+    "durabilityPerLevel:50.0"
+  ],
+  "holdEffects": [
+    "holdDurationMin:2.5",
+    "holdStaminaDrain:5.0"
+  ],
+  "elementalEffects": [
+    "fire:20.0",
+    "frost:0.0",
+    "lightning:0.0",
+    "poison:0.0",
+    "spirit:0.0"
+  ],
+  "physicalEffects": [
+    "attackForce:30.0",
+    "blunt:0.0",
+    "damage:0.0",
+    "pierce:.0",
+    "slash:52.0",
+    "chop:0.0",
+    "pickaxe:0.0",
+    "backStabBonus:3.0"
+  ],
+  "defenseEffects": [
+    "blockable:true",
+    "dodgeable:true",
+    "blockPower:10.0",
+    "deflectionForce:0.0"
+  ],
+  "upgradesPerLevel": [
+    "blockPowerPerLevel:0.0",
+    "deflectionForcePerLevel:0.0",
+    "bluntPerLevel:0.0",
+    "damagePerLevel:0.0",
+    "piercePerLevel:3.0",
+    "slashPerLevel:0.0",
+    "chopPerLevel:0.0",
+    "pickaxePerLevel:0.0",
+    "firePerLevel:10.0",
+    "frostPerLevel:0.0",
+    "lightningPerLevel:0.0",
+    "poisonPerLevel:0.0",
+    "spiritPerLevel:0.0"
+  ],
+  "ammoType": "arrow"
+}
