@@ -1,11 +1,11 @@
-﻿using BepInEx;
+﻿using System;
+using BepInEx;
 using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine.SceneManagement;
 using System.IO;
-using Newtonsoft.Json;
 using System.Linq;
 
 namespace Vbm.Valheim.ItemConfigurator
@@ -92,10 +92,11 @@ namespace Vbm.Valheim.ItemConfigurator
             // edge case where an item has more then one Recipe to craft it.
             foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == "XBow"))
             {
-                Weapon weapon = JsonConvert.DeserializeObject<Weapon>(File.ReadAllText(@"test.json"));
+              
+                Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
                 ZLog.Log($"{weapon.name}");
                 ZLog.Log($"{weapon.maxQuality}");
-                weapon.upgradeReqs.ForEach(i => ZLog.Log($"{0}\n"));
+                weapon.upgradeReqs.ForEach(i => ZLog.Log($"{i}{Environment.NewLine}"));
                 instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality = weapon.maxQuality; // Sets the max level an item can be upgraded to.
                 ZLog.Log($"Updated {instanceMRecipe.m_item.name} of {instanceMRecipe.name}, set m_maxQuality to {instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality}");
 
