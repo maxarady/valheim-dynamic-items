@@ -44,6 +44,7 @@ namespace Vbm.Valheim.ItemConfigurator
         public string repairStation { get; set; }
         public List<string> reqs { get; set; }
         public List<string> upgradeReqs { get; set; }
+        public List<string> effectsStats { get; set; }
         public List<string> durabilityEffects { get; set; }
         public List<string> holdEffects { get; set; }
         public List<string> elementalEffects { get; set; }
@@ -90,10 +91,14 @@ namespace Vbm.Valheim.ItemConfigurator
             // We need to know the ItemId of the item we want to change. For the Crossbow the ItemId is 'XBow'.
             // This foreach should return any Recipe that results in creating a XBow. This should solve an 
             // edge case where an item has more then one Recipe to craft it.
-            foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == "XBow"))
+            Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
+            foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == weapon.name))
             {
+
+                //Recipe item = ObjectDB.instance.m_recipes.
+                //instanceMRecipe.m_item.m
               
-                Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
+                //Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
                 ZLog.Log($"{weapon.name}");
                 ZLog.Log($"{weapon.maxQuality}");
                 weapon.upgradeReqs.ForEach(i => ZLog.Log($"{i}{Environment.NewLine}"));
@@ -101,29 +106,65 @@ namespace Vbm.Valheim.ItemConfigurator
                 ZLog.Log($"Updated {instanceMRecipe.m_item.name} of {instanceMRecipe.name}, set m_maxQuality to {instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality}");
 
                 //ObjectDB.instance.m_items
-                //instanceMRecipe.m_item.m_itemData.m_shared.m_durabilityPerLevel = weapon.durabilityEffects
+                
+                //instanceMRecipe.m_item.m_itemData.m_shared.
 
-                foreach (Piece.Requirement requirement in instanceMRecipe.m_resources)
+                //ObjectDB.instance.GetAllItems(ItemDrop.ItemData.ItemType.Bow, startWith:"XBow");
+                //ItemDrop.ItemData.SharedData mShared//
+
+                //stanceMRecipe.m_item.m_itemData.
+
+                //ItemDrop.ItemData item;
+                //item.m_shared.
+
+                foreach (string updatePiece in weapon.upgradeReqs)
                 {
-                    switch (requirement.m_resItem.name)
+                    string[] parsedUpddatePiece = updatePiece.Split(':');
+                    foreach (Piece.Requirement requirement in instanceMRecipe.m_resources)
                     {
-                        case "Crystal":
-                            requirement.m_amountPerLevel = 4;
-                            break;
-
-                        case "BlackMetal":
-                            requirement.m_amountPerLevel = 30;
-                            break;
-
-                        case "FineWood":
-                            requirement.m_amountPerLevel = 4;
-                            break;
-
-                        case "LinenThread":
-                            requirement.m_amountPerLevel = 4;
-                            break;
+                        ZLog.Log($"{requirement.m_resItem.name}{Environment.NewLine}");
+                        if (parsedUpddatePiece.GetValue(0).Equals(requirement.m_resItem.name))
+                        {
+                            requirement.m_amountPerLevel = Convert.ToInt32(parsedUpddatePiece.GetValue(1));
+                            ZLog.Log($"The item we want to modify: {parsedUpddatePiece.GetValue(0)}{Environment.NewLine}");
+                            ZLog.Log($"Material modifed: {requirement.m_resItem.name}{Environment.NewLine}");
+                            ZLog.Log($"New material requiredment: {requirement.m_amountPerLevel}{Environment.NewLine}");
+                        }
                     }
                 }
+                //instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
+                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType()}");
+                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList())}");
+
+                BindingFlags bindingFlags = BindingFlags.Public |
+                            BindingFlags.NonPublic |
+                            BindingFlags.Instance |
+                            BindingFlags.Static;
+
+                foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
+                {
+                    ZLog.Log($"{field.Name}");
+                }
+
+                /*var test = instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
+
+                foreach(var s in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList()))
+                {
+                    ZLog.Log($"{s.ToString()}{Environment.NewLine}");
+                }*/
+
+                /*foreach (string effects in weapon.effectsStats)
+                {
+                    string[] parsedEffects = effects.Split(':');
+                    ZLog.Log($"{requirement.m_resItem.name}{Environment.NewLine}");
+                    if (parsedEffects.GetValue(0).Equals(instanceMRecipe.m_item.m_itemData.m_shared.GetType()))
+                    {
+                        requirement.m_amountPerLevel = Convert.ToInt32(parsedEffects.GetValue(1));
+                        ZLog.Log($"The item we want to modify: {parsedEffects.GetValue(0)}{Environment.NewLine}");
+                        ZLog.Log($"Material modifed: {requirement.m_resItem.name}{Environment.NewLine}");
+                        ZLog.Log($"New material requiredment: {requirement.m_amountPerLevel}{Environment.NewLine}");
+                    }
+                }*/
             }
         }
     }
