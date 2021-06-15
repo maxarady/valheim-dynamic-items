@@ -44,7 +44,7 @@ namespace Vbm.Valheim.ItemConfigurator
         public string repairStation { get; set; }
         public List<string> reqs { get; set; }
         public List<string> upgradeReqs { get; set; }
-        public List<string> effectsStats { get; set; }
+        public List<string> sharedStats { get; set; }
         public List<string> durabilityEffects { get; set; }
         public List<string> holdEffects { get; set; }
         public List<string> elementalEffects { get; set; }
@@ -88,9 +88,6 @@ namespace Vbm.Valheim.ItemConfigurator
                 return;
             }
 
-            // We need to know the ItemId of the item we want to change. For the Crossbow the ItemId is 'XBow'.
-            // This foreach should return any Recipe that results in creating a XBow. This should solve an 
-            // edge case where an item has more then one Recipe to craft it.
             Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
             foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == weapon.name))
             {
@@ -133,18 +130,57 @@ namespace Vbm.Valheim.ItemConfigurator
                     }
                 }
                 //instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
-                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType()}");
-                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList())}");
+                //ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType()}");
+                //ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList())}");
 
                 BindingFlags bindingFlags = BindingFlags.Public |
                             BindingFlags.NonPublic |
                             BindingFlags.Instance |
                             BindingFlags.Static;
 
-                foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
+                /*foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
                 {
-                    ZLog.Log($"{field.Name}");
+                    ZLog.Log($"{field.Name.ToString()}");
+                }*/
+
+                foreach (string effects in weapon.sharedStats)
+                {
+                    //ZLog.Log($"{field.Name.ToString()}");
+                    //ZLog.Log($"{effects}");
+                    foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
+                    {
+
+                        
+                        string[] parsedEffects = effects.Split(':');
+                        //ZLog.Log($"{field.Name.ToString()}");
+                        string affixedName = parsedEffects.GetValue(0).ToString();
+                        if(parsedEffects.GetValue(0).ToString().StartsWith("m_") == false)
+                        {
+                            affixedName = "m_" + affixedName;
+                        }
+                        /*ZLog.Log($"{affixedName}");
+                        ZLog.Log($"{parsedEffects.GetValue(0).ToString()}{Environment.NewLine}");
+                        ZLog.Log($"{field.Name.ToString()}{Environment.NewLine}");*/
+                        /*if (parsedEffects.GetValue(0).ToString().Equals(field.Name.ToString()))
+                        {
+                            ZLog.Log($"Inside Loop 1: {parsedEffects.GetValue(0)}");
+                            ZLog.Log($"Inside Loop 1: {field.Name.ToString()}");
+                        }*/
+                        if (affixedName.ToString().Equals(field.Name.ToString()))
+                        {
+                            field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, parsedEffects.GetValue(1));
+                            if(affixedName == "m_attackForce")
+                            {
+                                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.m_attackForce}{Environment.NewLine}");
+                            }
+                            //ZLog.Log($"Inside Loop 2: {affixedName}");
+                            //ZLog.Log($"Inside Loop 2: {field.Name.ToString()}");
+
+                            //instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Where(r => r.Name == affixedName)
+                        }
+                    }
                 }
+                
 
                 /*var test = instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
 
