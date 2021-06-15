@@ -72,6 +72,11 @@ namespace Vbm.Valheim.ItemConfigurator
 
         private static void FixRecipes()
         {
+            BindingFlags bindingFlags = BindingFlags.Public |
+                            BindingFlags.NonPublic |
+                            BindingFlags.Instance |
+                            BindingFlags.Static;
+
             ZLog.Log("Updating Recipes");
 
             // This is normal checking if ObjectDB is ready. 
@@ -91,28 +96,12 @@ namespace Vbm.Valheim.ItemConfigurator
             Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
             foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == weapon.name))
             {
-
-                //Recipe item = ObjectDB.instance.m_recipes.
-                //instanceMRecipe.m_item.m
-              
-                //Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
                 ZLog.Log($"{weapon.name}");
                 ZLog.Log($"{weapon.maxQuality}");
                 weapon.upgradeReqs.ForEach(i => ZLog.Log($"{i}{Environment.NewLine}"));
                 instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality = weapon.maxQuality; // Sets the max level an item can be upgraded to.
                 ZLog.Log($"Updated {instanceMRecipe.m_item.name} of {instanceMRecipe.name}, set m_maxQuality to {instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality}");
 
-                //ObjectDB.instance.m_items
-                
-                //instanceMRecipe.m_item.m_itemData.m_shared.
-
-                //ObjectDB.instance.GetAllItems(ItemDrop.ItemData.ItemType.Bow, startWith:"XBow");
-                //ItemDrop.ItemData.SharedData mShared//
-
-                //stanceMRecipe.m_item.m_itemData.
-
-                //ItemDrop.ItemData item;
-                //item.m_shared.
 
                 foreach (string updatePiece in weapon.upgradeReqs)
                 {
@@ -129,24 +118,9 @@ namespace Vbm.Valheim.ItemConfigurator
                         }
                     }
                 }
-                //instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
-                //ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType()}");
-                //ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList())}");
-
-                BindingFlags bindingFlags = BindingFlags.Public |
-                            BindingFlags.NonPublic |
-                            BindingFlags.Instance |
-                            BindingFlags.Static;
-
-                /*foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
-                {
-                    ZLog.Log($"{field.Name.ToString()}");
-                }*/
 
                 foreach (string effects in weapon.sharedStats)
                 {
-                    //ZLog.Log($"{field.Name.ToString()}");
-                    //ZLog.Log($"{effects}");
                     foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
                     {
 
@@ -158,14 +132,6 @@ namespace Vbm.Valheim.ItemConfigurator
                         {
                             affixedName = "m_" + affixedName;
                         }
-                        /*ZLog.Log($"{affixedName}");
-                        ZLog.Log($"{parsedEffects.GetValue(0).ToString()}{Environment.NewLine}");
-                        ZLog.Log($"{field.Name.ToString()}{Environment.NewLine}");*/
-                        /*if (parsedEffects.GetValue(0).ToString().Equals(field.Name.ToString()))
-                        {
-                            ZLog.Log($"Inside Loop 1: {parsedEffects.GetValue(0)}");
-                            ZLog.Log($"Inside Loop 1: {field.Name.ToString()}");
-                        }*/
                         if (affixedName.ToString().Equals(field.Name.ToString()))
                         {
                             field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, parsedEffects.GetValue(1));
@@ -173,34 +139,9 @@ namespace Vbm.Valheim.ItemConfigurator
                             {
                                 ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.m_attackForce}{Environment.NewLine}");
                             }
-                            //ZLog.Log($"Inside Loop 2: {affixedName}");
-                            //ZLog.Log($"Inside Loop 2: {field.Name.ToString()}");
-
-                            //instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Where(r => r.Name == affixedName)
                         }
                     }
                 }
-                
-
-                /*var test = instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList());
-
-                foreach(var s in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields().Select(field => field.Name.ToList()))
-                {
-                    ZLog.Log($"{s.ToString()}{Environment.NewLine}");
-                }*/
-
-                /*foreach (string effects in weapon.effectsStats)
-                {
-                    string[] parsedEffects = effects.Split(':');
-                    ZLog.Log($"{requirement.m_resItem.name}{Environment.NewLine}");
-                    if (parsedEffects.GetValue(0).Equals(instanceMRecipe.m_item.m_itemData.m_shared.GetType()))
-                    {
-                        requirement.m_amountPerLevel = Convert.ToInt32(parsedEffects.GetValue(1));
-                        ZLog.Log($"The item we want to modify: {parsedEffects.GetValue(0)}{Environment.NewLine}");
-                        ZLog.Log($"Material modifed: {requirement.m_resItem.name}{Environment.NewLine}");
-                        ZLog.Log($"New material requiredment: {requirement.m_amountPerLevel}{Environment.NewLine}");
-                    }
-                }*/
             }
         }
     }
