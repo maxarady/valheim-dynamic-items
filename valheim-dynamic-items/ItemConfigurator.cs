@@ -45,13 +45,8 @@ namespace Vbm.Valheim.ItemConfigurator
         public List<string> reqs { get; set; }
         public List<string> upgradeReqs { get; set; }
         public List<string> sharedStats { get; set; }
-        public List<string> durabilityEffects { get; set; }
-        public List<string> holdEffects { get; set; }
-        public List<string> elementalEffects { get; set; }
-        public List<string> physicalEffects { get; set; }
-        public List<string> defenseEffects { get; set; }
-        public List<string> upgradesPerLevel { get; set; }
-        public string ammoType { get; set; }
+        public List<string> damagesStats { get; set; }
+        public List<string> damagesPerLevelStats { get; set; }
     }
 
     public class Patch
@@ -72,6 +67,8 @@ namespace Vbm.Valheim.ItemConfigurator
 
         private static void FixRecipes()
         {
+            int debug = 1;
+
             BindingFlags bindingFlags = BindingFlags.Public |
                             BindingFlags.NonPublic |
                             BindingFlags.Instance |
@@ -93,7 +90,14 @@ namespace Vbm.Valheim.ItemConfigurator
                 return;
             }
 
-            Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/test.json"));
+            Weapon weapon = fastJSON.JSON.ToObject<Weapon>(File.ReadAllText($"{BepInEx.Paths.PluginPath}/valheim-dynamic-items/testFang.json"));
+            if (debug == 1)
+            {
+                ZLog.Log(weapon.name);
+                ZLog.Log(weapon.maxQuality);
+                ZLog.Log("This concludes debug block 1.");
+            }
+
             foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == weapon.name))
             {
                 ZLog.Log($"{weapon.name}");
@@ -123,21 +127,155 @@ namespace Vbm.Valheim.ItemConfigurator
                 {
                     foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
                     {
-
-                        
                         string[] parsedEffects = effects.Split(':');
-                        //ZLog.Log($"{field.Name.ToString()}");
                         string affixedName = parsedEffects.GetValue(0).ToString();
-                        if(parsedEffects.GetValue(0).ToString().StartsWith("m_") == false)
+                        if (parsedEffects.GetValue(0).ToString().StartsWith("m_") == false)
                         {
                             affixedName = "m_" + affixedName;
                         }
                         if (affixedName.ToString().Equals(field.Name.ToString()))
                         {
-                            field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, parsedEffects.GetValue(1));
-                            if(affixedName == "m_attackForce")
+                            string sysField = field.FieldType.ToString();
+                            string[] parsedSysField = sysField.Split('.');
+                            ZLog.Log(affixedName);
+                            ZLog.Log(parsedSysField.GetValue(1));
+                            if (parsedSysField.GetValue(1).Equals("Boolean"))
                             {
-                                ZLog.Log($"{instanceMRecipe.m_item.m_itemData.m_shared.m_attackForce}{Environment.NewLine}");
+                                var isBool = bool.TryParse(parsedEffects.GetValue(1).ToString(), out bool p);
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, p);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Single"))
+                            {
+                                var isSingle = Single.TryParse(parsedEffects.GetValue(1).ToString(), out Single q);
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, q);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Double"))
+                            {
+                                var isDouble = double.TryParse(parsedEffects.GetValue(1).ToString(), out double d);
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, d);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("String"))
+                            {
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared, parsedEffects.GetValue(1));
+                            }
+                            else
+                            {
+                                ZLog.Log("No matched types");
+                            }
+
+                            if (affixedName.ToString() == "m_attackForce")
+                            {
+                                ZLog.Log($"This is the attack force debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_attackForce}");
+                            }
+                        }
+                    }
+                }
+
+                ZLog.Log("Next loop for damage stats");
+                foreach (string damages in weapon.damagesStats)
+                {
+                    foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.m_damages.GetType().GetFields(bindingFlags))
+                    {
+                        string[] parsedDamages = damages.Split(':');
+                        string affixedName = parsedDamages.GetValue(0).ToString();
+                        if (parsedDamages.GetValue(0).ToString().StartsWith("m_") == false)
+                        {
+                            affixedName = "m_" + affixedName;
+                        }
+                        if (affixedName.ToString().Equals(field.Name.ToString()))
+                        {
+                            string sysField = field.FieldType.ToString();
+                            string[] parsedSysField = sysField.Split('.');
+                            ZLog.Log($"{affixedName} {field.Name.ToString()} {parsedSysField.GetValue(1)} {parsedDamages.GetValue(1).ToString()}");
+                            if (parsedSysField.GetValue(1).Equals("Boolean"))
+                            {
+                                var isBool = bool.TryParse(parsedDamages.GetValue(1).ToString(), out bool p);
+                                ZLog.Log($"This is p: {p}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, p);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Single"))
+                            {
+                                var isSingle = Single.TryParse(parsedDamages.GetValue(1).ToString(), out Single q);
+                                ZLog.Log($"This is q: {q}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, q);
+                                ZLog.Log($"This is fieldName: {field.Name.ToString()}");
+                                if (affixedName.ToString() == "m_fire")
+                                {
+                                    ZLog.Log($"This is the fire damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire}");
+                                }
+                                if (affixedName.ToString() == "m_slash")
+                                {
+                                    ZLog.Log($"This is the slash damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_slash}");
+                                }
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Double"))
+                            {
+                                var isDouble = double.TryParse(parsedDamages.GetValue(1).ToString(), out double d);
+                                ZLog.Log($"This is d: {d}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, d);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("String"))
+                            {
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, parsedDamages.GetValue(1));
+                            }
+                            else
+                            {
+                                ZLog.Log("No matched types");
+                            }
+
+                            if (affixedName.ToString() == "m_fire")
+                            {
+                                ZLog.Log($"This is the attack force debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire}");
+                            }
+                        }
+                    }
+                }
+
+                foreach (string damagesPerLevel in weapon.damagesPerLevelStats)
+                {
+                    foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.GetType().GetFields(bindingFlags))
+                    {
+                        string[] parsedDamagesPerLevel = damagesPerLevel.Split(':');
+                        string affixedName = parsedDamagesPerLevel.GetValue(0).ToString();
+                        if (parsedDamagesPerLevel.GetValue(0).ToString().StartsWith("m_") == false)
+                        {
+                            affixedName = "m_" + affixedName;
+                        }
+                        if (affixedName.ToString().Equals(field.Name.ToString()))
+                        {
+                            string sysField = field.FieldType.ToString();
+                            string[] parsedSysField = sysField.Split('.');
+                            ZLog.Log($"{affixedName} {field.Name.ToString()} {parsedSysField.GetValue(1)} {parsedDamagesPerLevel.GetValue(1).ToString()}");
+                            if (parsedSysField.GetValue(1).Equals("Boolean"))
+                            {
+                                var isBool = bool.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out bool p);
+                                ZLog.Log($"This is p: {p}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, p);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Single"))
+                            {
+                                var isSingle = Single.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out Single q);
+                                ZLog.Log($"This is q: {q}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, q);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("Double"))
+                            {
+                                var isDouble = double.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out double d);
+                                ZLog.Log($"This is d: {d}");
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, d);
+                            }
+                            else if (parsedSysField.GetValue(1).Equals("String"))
+                            {
+                                field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, parsedDamagesPerLevel.GetValue(1));
+                            }
+                            else
+                            {
+                                ZLog.Log("No matched types");
+                            }
+
+                            if (affixedName.ToString() == "m_fire")
+                            {
+                                ZLog.Log($"This is the attack force debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.m_fire}");
                             }
                         }
                     }
