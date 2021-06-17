@@ -96,8 +96,8 @@ namespace Vbm.Valheim.ItemConfigurator
             ZLog.Log(path);
             path = ($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items").ToString();
             ZLog.Log($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items");*/
-            ZLog.Log($"{BepInEx.Paths.PluginPath}");
-            string[] files = Directory.GetFiles($"{BepInEx.Paths.PluginPath}", " *.json");
+            ZLog.Log($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items");
+            string[] files = Directory.GetFiles($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items", "*.json");
             ZLog.Log(files.Length);
             foreach (var file in files)
             {
@@ -114,8 +114,6 @@ namespace Vbm.Valheim.ItemConfigurator
                 {
                     ZLog.Log($"{weapon.name}");
                     ZLog.Log($"{weapon.maxQuality}");
-                    //string craftStation = weapon.craftingStation.Split(':').GetValue(1).ToString();
-                    //instanceMRecipe.m_craftingStation = weapon.craftingStation.Split(':').GetValue(1).ToString();
                     weapon.upgradeReqs.ForEach(i => ZLog.Log($"{i}{Environment.NewLine}"));
                     instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality = weapon.maxQuality; // Sets the max level an item can be upgraded to.
                     ZLog.Log($"Updated {instanceMRecipe.m_item.name} of {instanceMRecipe.name}, set m_maxQuality to {instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality}");
@@ -148,14 +146,10 @@ namespace Vbm.Valheim.ItemConfigurator
                             {
                                 affixedName = "m_" + affixedName;
                             }
-                            //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damages.{affixedName}");
                             if (affixedName.ToString().Equals(field.Name.ToString()))
                             {
                                 string sysField = field.FieldType.ToString();
                                 string[] parsedSysField = sysField.Split('.');
-                                //ZLog.Log(affixedName);
-                                //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damages.{affixedName}");
-                                //ZLog.Log(parsedSysField.GetValue(1));
                                 if (parsedSysField.GetValue(1).Equals("Boolean"))
                                 {
                                     var isBool = bool.TryParse(parsedEffects.GetValue(1).ToString(), out bool p);
@@ -179,11 +173,6 @@ namespace Vbm.Valheim.ItemConfigurator
                                 {
                                     ZLog.Log("No matched types");
                                 }
-
-                                if (affixedName.ToString() == "m_attackForce")
-                                {
-                                    ZLog.Log($"This is the attack force debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_attackForce}");
-                                }
                             }
                         }
                     }
@@ -199,13 +188,10 @@ namespace Vbm.Valheim.ItemConfigurator
                             {
                                 affixedName = "m_" + affixedName;
                             }
-                            //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damages.{affixedName}");
                             if (affixedName.ToString().Equals(field.Name.ToString()))
                             {
                                 string sysField = field.FieldType.ToString();
                                 string[] parsedSysField = sysField.Split('.');
-                                //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damages.{affixedName}");
-                                //ZLog.Log($"{affixedName} {field.Name.ToString()} {parsedSysField.GetValue(1)} {parsedDamages.GetValue(1).ToString()}");
                                 var m_shared = instanceMRecipe.m_item.m_itemData.m_shared;
                                 var affixedNameField = m_shared.GetType().GetField("m_damages");
                                 object affixedNameValue = affixedNameField.GetValue(m_shared);
@@ -213,59 +199,29 @@ namespace Vbm.Valheim.ItemConfigurator
                                 if (parsedSysField.GetValue(1).Equals("Boolean"))
                                 {
                                     var isBool = bool.TryParse(parsedDamages.GetValue(1).ToString(), out bool p);
-                                    ZLog.Log($"This is p: {p}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, p);
                                     codeField.SetValue(affixedNameValue, p);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("Single"))
                                 {
                                     var isSingle = Single.TryParse(parsedDamages.GetValue(1).ToString(), out Single q);
-                                    ZLog.Log($"This is q: {q}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, q);
                                     codeField.SetValue(affixedNameValue, q);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
-                                    ZLog.Log($"This is fieldName: {field.Name.ToString()}");
-                                    if (affixedName.ToString() == "m_fire")
-                                    {
-                                        ZLog.Log($"This is the fire damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire}");
-                                        instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire = q;
-                                    }
-                                    if (affixedName.ToString() == "m_poison")
-                                    {
-                                        ZLog.Log($"This is the pre poison damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_poison}");
-                                        instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_poison = q;
-                                        ZLog.Log($"This is the post poison damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_poison}");
-                                    }
-                                    if (affixedName.ToString() == "m_slash")
-                                    {
-                                        ZLog.Log($"This is the slash damage debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_slash}");
-                                    }
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("Double"))
                                 {
                                     var isDouble = double.TryParse(parsedDamages.GetValue(1).ToString(), out double d);
-                                    ZLog.Log($"This is d: {d}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, d);
                                     codeField.SetValue(affixedNameValue, d);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("String"))
                                 {
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damages, parsedDamages.GetValue(1));
                                     codeField.SetValue(affixedNameValue, parsedDamages.GetValue(1));
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else
                                 {
                                     ZLog.Log("No matched types");
-                                }
-
-                                if (affixedName.ToString() == "m_fire")
-                                {
-                                    ZLog.Log($"This is the attack fire debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire}");
-                                    instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire = 777f;
-                                    ZLog.Log($"This is the attack fire post debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire}");
                                 }
                             }
                         }
@@ -281,7 +237,6 @@ namespace Vbm.Valheim.ItemConfigurator
                             {
                                 affixedName = "m_" + affixedName;
                             }
-                            //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.{affixedName}");
                             var m_shared = instanceMRecipe.m_item.m_itemData.m_shared;
                             var affixedNameField = m_shared.GetType().GetField("m_damagesPerLevel");
                             object affixedNameValue = affixedNameField.GetValue(m_shared);
@@ -290,48 +245,32 @@ namespace Vbm.Valheim.ItemConfigurator
                             {
                                 string sysField = field.FieldType.ToString();
                                 string[] parsedSysField = sysField.Split('.');
-                                //ZLog.Log($"instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.{affixedName}");
-                                //ZLog.Log($"{affixedName} {field.Name.ToString()} {parsedSysField.GetValue(1)} {parsedDamagesPerLevel.GetValue(1).ToString()}");
                                 if (parsedSysField.GetValue(1).Equals("Boolean"))
                                 {
                                     var isBool = bool.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out bool p);
-                                    //ZLog.Log($"This is p: {p}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, p);
                                     codeField.SetValue(affixedNameValue, p);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("Single"))
                                 {
                                     var isSingle = Single.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out Single q);
-                                    //ZLog.Log($"This is q: {q}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, q);
                                     codeField.SetValue(affixedNameValue, q);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("Double"))
                                 {
                                     var isDouble = double.TryParse(parsedDamagesPerLevel.GetValue(1).ToString(), out double d);
-                                    //ZLog.Log($"This is d: {d}");
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, d);
                                     codeField.SetValue(affixedNameValue, d);
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else if (parsedSysField.GetValue(1).Equals("String"))
                                 {
-                                    //field.SetValue(instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel, parsedDamagesPerLevel.GetValue(1));
                                     codeField.SetValue(affixedNameValue, parsedDamagesPerLevel.GetValue(1));
                                     affixedNameField.SetValue(m_shared, affixedNameValue);
                                 }
                                 else
                                 {
                                     ZLog.Log("No matched types");
-                                }
-
-                                if (affixedName.ToString() == "m_fire")
-                                {
-                                    ZLog.Log($"This is the attack fire per level debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.m_fire}");
-                                    instanceMRecipe.m_item.m_itemData.m_shared.m_damages.m_fire = 77f;
-                                    ZLog.Log($"This is the attack fire per level post debug message: {instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.m_fire}");
                                 }
                             }
                         }
