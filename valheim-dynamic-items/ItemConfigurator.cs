@@ -90,13 +90,6 @@ namespace Vbm.Valheim.ItemConfigurator
                 return;
             }
 
-            string path = Directory.GetCurrentDirectory();
-            ZLog.Log(path);
-            /*path = path.ToString() + "/BepInEx/valheim-dynamic-items";
-            ZLog.Log(path);
-            path = ($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items").ToString();
-            ZLog.Log($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items");*/
-            ZLog.Log($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items");
             string[] files = Directory.GetFiles($"{BepInEx.Paths.PluginPath}\\valheim-dynamic-items", "*.json");
             ZLog.Log(files.Length);
             foreach (var file in files)
@@ -113,11 +106,8 @@ namespace Vbm.Valheim.ItemConfigurator
                 foreach (Recipe instanceMRecipe in ObjectDB.instance.m_recipes.Where(r => r.m_item?.name == weapon.name))
                 {
                     ZLog.Log($"{weapon.name}");
-                    ZLog.Log($"{weapon.maxQuality}");
                     weapon.upgradeReqs.ForEach(i => ZLog.Log($"{i}{Environment.NewLine}"));
                     instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality = weapon.maxQuality; // Sets the max level an item can be upgraded to.
-                    ZLog.Log($"Updated {instanceMRecipe.m_item.name} of {instanceMRecipe.name}, set m_maxQuality to {instanceMRecipe.m_item.m_itemData.m_shared.m_maxQuality}");
-
 
                     foreach (string updatePiece in weapon.upgradeReqs)
                     {
@@ -128,14 +118,12 @@ namespace Vbm.Valheim.ItemConfigurator
                             if (parsedUpddatePiece.GetValue(0).Equals(requirement.m_resItem.name))
                             {
                                 requirement.m_amountPerLevel = Convert.ToInt32(parsedUpddatePiece.GetValue(1));
-                                ZLog.Log($"The item we want to modify: {parsedUpddatePiece.GetValue(0)}{Environment.NewLine}");
+                                /*ZLog.Log($"The item we want to modify: {parsedUpddatePiece.GetValue(0)}{Environment.NewLine}");
                                 ZLog.Log($"Material modifed: {requirement.m_resItem.name}{Environment.NewLine}");
-                                ZLog.Log($"New material requiredment: {requirement.m_amountPerLevel}{Environment.NewLine}");
+                                ZLog.Log($"New material requiredment: {requirement.m_amountPerLevel}{Environment.NewLine}");*/
                             }
                         }
                     }
-
-                    ZLog.Log("Next loop for shared stats");
                     foreach (string effects in weapon.sharedStats)
                     {
                         foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.GetType().GetFields(bindingFlags))
@@ -176,8 +164,6 @@ namespace Vbm.Valheim.ItemConfigurator
                             }
                         }
                     }
-
-                    ZLog.Log("Next loop for damage stats");
                     foreach (string damages in weapon.damagesStats)
                     {
                         foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.m_damages.GetType().GetFields(bindingFlags))
@@ -226,7 +212,6 @@ namespace Vbm.Valheim.ItemConfigurator
                             }
                         }
                     }
-
                     foreach (string damagesPerLevel in weapon.damagesPerLevelStats)
                     {
                         foreach (FieldInfo field in instanceMRecipe.m_item.m_itemData.m_shared.m_damagesPerLevel.GetType().GetFields(bindingFlags))
