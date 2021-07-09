@@ -64,8 +64,8 @@
     <Reference Include="bepinex, Version=5.4.10.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Pfhoenix.Valheim.ModProjectReferences.1.0.6\lib\net46\bepinex.dll</HintPath>
     </Reference>
-    <Reference Include="fastJSON, Version=2.4.0.0, Culture=neutral, PublicKeyToken=6b75a806b86095cd, processorArchitecture=MSIL">
-      <HintPath>..\packages\fastJSON.2.4.0.4\lib\net40\fastJSON.dll</HintPath>
+    <Reference Include="fastJSON">
+      <HintPath>..\packages\fastJSON.2.4.0.4\lib\net5.0\fastJSON.dll</HintPath>
     </Reference>
     <Reference Include="Jotunn, Version=2.0.12.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
